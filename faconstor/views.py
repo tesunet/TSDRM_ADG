@@ -1053,48 +1053,9 @@ def get_monitor_data(request):
                     "percent": "0%"
                 })
 
-        # 连续成功演练天数
-        success_day_list = {}
-        process_name_list = []
-
-        all_process = Process.objects.exclude(state="9").filter(type="cv_oracle")
-        for process in all_process:
-            print(process)
-            success_count = 0
-            yeas_today = (datetime.datetime.now() + datetime.timedelta(days=-1)).date()
-            i = 0
-            while True:
-                process_run = process.processrun_set.exclude(state__in=["9", "REJECT"]).filter(
-                    starttime__startswith=datetime.datetime.now().date())
-                print(process_run)
-
-                if process_run.exists():
-                    # 一天的最后一次执行成功
-                    if process_run.last().state == "DONE":
-                        success_count += 1
-                        if yeas_today:
-                            process_run = process.processrun_set.exclude(state__in=["9", "REJECT"]).filter(
-                                starttime__startswith=datetime.datetime.now().date())
-                            if process_run.exists():
-                                # 一天的最后一次执行成功
-                                if process_run.last().state == "DONE":
-                                    success_count += 1
-                                else:
-                                    break
-                            else:
-                                pass
-                    else:
-                        success_day_list[success_count + i] = success_count
-                        break
-                else:
-                    pass
-            process_name_list.append(process.name)
-
         return JsonResponse({
             "week_drill": week_drill,
             "avgRTO": avgRTO,
-            "process_name_list": process_name_list,
-            "success_day_list":success_day_list,
             "drill_top_time": drill_top_time,
             "drill_rate": drill_rate,
             "drill_monitor": drill_monitor,

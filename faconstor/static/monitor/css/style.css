@@ -10,7 +10,7 @@
        font-family: 微软雅黑, MicrosoftYahei, sans-serif; color:#fff;
 
   }
-  h1,
+h1,
 h2,
 h3,
 h4,
@@ -355,9 +355,12 @@ caption, td {
 }
 
 
-/*嘉兴银行logo*/
+.ts_logo{
+    float: right;
+    margin-top: -40px;
+    margin-right:60px;
 
-
+}
 
 
 /*  交通分析*/
