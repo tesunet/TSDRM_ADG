@@ -12,17 +12,18 @@ $(document).ready(function () {
             {"data": "type"},
             {"data": "username"},
             {"data": "password"},
-            {"data": "host_type"},
+            {"data": "host_type_name"},
             {"data": "oracle_name"},
             {"data": "oracle_password"},
+            {"data": "oracle_instance"},
             {"data": null}
         ],
 
         "columnDefs": [{
-            "targets": -5,
-            "visible": false,
-        }, {"targets": -2,
-            "visible": false,
+            "targets": -6,
+            "visible": false
+        }, {"targets": -3,
+            "visible": false
         },
             {
             "targets": -1,
@@ -43,7 +44,7 @@ $(document).ready(function () {
                 "sNext": "后一页",
                 "sLast": "尾页"
             },
-            "sZeroRecords": "没有检索到数据",
+            "sZeroRecords": "没有检索到数据"
 
         }
     });
@@ -82,9 +83,10 @@ $(document).ready(function () {
         $("#type").val(data.type);
         $("#username").val(data.username);
         $("#password").val(data.password);
-        $("#host_type").val(data.host_type);
+        $("#host_type").val(data.host_type_value);
         $("#oracle_name").val(data.oracle_name);
         $("#oracle_password").val(data.oracle_password);
+        $("#oracle_instance").val(data.oracle_instance);
     });
 
     $("#new").click(function () {
@@ -98,6 +100,7 @@ $(document).ready(function () {
         $("#host_type").val("");
         $("#oracle_name").val("");
         $("#oracle_password").val("");
+        $("#oracle_instance").val("");
     });
 
     $('#save').click(function () {
@@ -118,6 +121,7 @@ $(document).ready(function () {
                 host_type:$("#host_type").val(),
                 oracle_name:$("#oracle_name").val(),
                 oracle_password:$("#oracle_password").val(),
+                oracle_instance:$("#oracle_instance").val()
             },
             success: function (data) {
                 if (data.ret == 1) {
@@ -142,20 +146,5 @@ $(document).ready(function () {
         } else {
             $("#type").val("");
         }
-    });
-    // $("#type").change(function () {
-    //     if ($(this).val() == 'SSH') {
-    //         $("#os").val("Linux");
-    //     } else if ($(this).val() == 'BAT'){
-    //
-    //     } else if ($(this).val() == 'BAT') {
-    //         $("#os").val("Windows");
-    //     } else {
-    //         $("#os").val("");
-    //     }
-    // });
-
-    $('#error').click(function () {
-        $(this).hide()
     });
 });

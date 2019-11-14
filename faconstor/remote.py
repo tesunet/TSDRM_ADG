@@ -154,10 +154,10 @@ class ServerByPara(object):
                 data = "脚本执行超时 {0}".format(e)
                 log = "脚本执行超时"
             elif type(e) in [ConnectionError, WinRMTransportError]:
-                print("连接windows失败")
+                print("连接服务器失败")
                 exec_tag = 1
-                data = "连接windows失败 {0}".format(e)
-                log = "连接windows失败"
+                data = "连接服务器失败 {0}".format(e)
+                log = "连接服务器失败"
             else:
                 print("执行windows脚本发生异常错误")
                 exec_tag = 1
@@ -214,10 +214,7 @@ class ServerByPara(object):
 if __name__ == '__main__':
     # server_obj = ServerByPara(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
     # server_obj = ServerByPara(r"C:\Users\Administrator\Desktop\test_python.bat", "192.168.100.151", "administrator","tesunet@2017", "Windows")
-    server_obj = ServerByPara(r"C:\Users\Administrator\Desktop\test.bat",
-                              "192.168.100.154", "administrator", "tesunet@2017", "Windows")
-    linux_temp_script_file = r"/tmp/drm/954/tmp_script_6486.sh&&/tmp/drm/954/tmp_script_6486.sh"
-    cmd = r"sed -i 's/\r$//' {0}&&{0}".format(linux_temp_script_file)
+    server_obj = ServerByPara('cd ..', "192.168.1.56 ", "root", "tesunet", "Linux")
     # print(cmd)  # sed -i 's/\r$//' /tmp/drm/954/tmp_script_6486.sh&&/tmp/drm/954/tmp_script_6486.sh
     # server_obj = ServerByPara("mkdir -p /tmp/drm/957",
     #                           "10.64.7.43", "root", "qtdl2003", "Linux")
@@ -226,4 +223,4 @@ if __name__ == '__main__':
     # server_obj = ServerByPara(r"echo '你好你好你好你好你好你好你好';echo '你好你好你好你好你好你好你好';echo '你好你好你好你好你好你好你好'", "192.168.184.66", "root","password", "Linux")
 
     server_obj.run("")
-    print(11111111111111)
+

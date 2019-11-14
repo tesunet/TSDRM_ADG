@@ -85,7 +85,7 @@
                                 <div class="col-md-10">
                                     <select class="form-control" id="process_main_database" name="process_main_database">
                                         {% for main_database in all_main_database %}
-                                            <option value="{{ main_database.id }}">{{ main_database.host_name }}</option>
+                                            <option value="{{ main_database.main_database_id }}">{{ main_database.main_database_name }}</option>
                                         {% endfor %}
                                     </select>
                                     <div class="form-control-focus"></div>
@@ -99,7 +99,7 @@
 
                                     <select class="form-control"  id="process_prepare_database" name="process_prepare_database">
                                         {% for prepare_database in all_prepare_database %}
-                                            <option value="{{ prepare_database.id }}">{{ prepare_database.host_name }}</option>
+                                            <option value="{{ prepare_database.prepare_database_id }}">{{ prepare_database.prepare_database_name }}</option>
                                         {% endfor %}
                                     </select>
                                     <div class="form-control-focus"></div>

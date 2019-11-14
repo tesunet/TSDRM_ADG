@@ -18,6 +18,7 @@ import requests
 from operator import itemgetter
 import logging
 from collections import OrderedDict
+import cx_Oracle
 
 from django.contrib.auth.decorators import login_required
 from django.utils.timezone import utc
@@ -239,7 +240,7 @@ def getpagefuns(funid, request=""):
 
 
 def test(request):
-    if request.user.is_authenticated() and request.session['isadmin']:
+    if request.user.is_authenticated():
         errors = []
         return render(request, 'test.html',
                       {'username': request.user.userinfo.fullname, "errors": errors})
@@ -616,8 +617,8 @@ def index(request, funid):
         """)
         rows = cursor.fetchall()
 
-        cvsql = SQLApi.CVApi(settings.sql_credit)
-        cvsql.updateCVUTC()
+        # cvsql = SQLApi.CVApi(settings.sql_credit)
+        # cvsql.updateCVUTC()
 
         if len(rows) > 0:
             for task in rows:
@@ -2294,7 +2295,7 @@ def groupsavefuntree(request):
 
 
 def script(request, funid):
-    if request.user.is_authenticated() and request.session['isadmin']:
+    if request.user.is_authenticated():
         errors = []
         if request.method == 'POST':
             my_file = request.FILES.get("myfile", None)  # 获取上传的文件，如果没有文件，则默认为None
@@ -2384,7 +2385,7 @@ def script(request, funid):
 
 
 def scriptdata(request):
-    if request.user.is_authenticated() and request.session['isadmin']:
+    if request.user.is_authenticated():
         result = []
         allscript = Script.objects.exclude(state="9").filter(step_id=None)
         if (len(allscript) > 0):
@@ -2437,7 +2438,7 @@ def scriptdel(request):
     :param request:
     :return:
     """
-    if request.user.is_authenticated() and request.session['isadmin']:
+    if request.user.is_authenticated():
         if 'id' in request.POST:
             id = request.POST.get('id', '')
             try:
@@ -2460,7 +2461,7 @@ def scriptdel(request):
 
 
 def scriptsave(request):
-    if request.user.is_authenticated() and request.session['isadmin']:
+    if request.user.is_authenticated():
         if 'id' in request.POST:
             result = {}
             id = request.POST.get('id', '')
@@ -2669,7 +2670,7 @@ def scriptexport(request):
 
 
 def processscriptsave(request):
-    if request.user.is_authenticated() and request.session['isadmin']:
+    if request.user.is_authenticated():
         if 'id' in request.POST:
             result = {}
             processid = request.POST.get('processid', '')
@@ -2875,7 +2876,7 @@ def processscriptsave(request):
 
 
 def verify_items_save(request):
-    if request.user.is_authenticated() and request.session['isadmin']:
+    if request.user.is_authenticated():
         if 'id' in request.POST:
             result = {}
             id = request.POST.get('id', '')
@@ -2910,7 +2911,7 @@ def verify_items_save(request):
 
 
 def get_verify_items_data(request):
-    if request.user.is_authenticated() and request.session['isadmin']:
+    if request.user.is_authenticated():
         if 'id' in request.POST:
             id = request.POST.get('id', '')
             try:
@@ -2926,7 +2927,7 @@ def get_verify_items_data(request):
 
 
 def remove_verify_item(request):
-    if request.user.is_authenticated() and request.session['isadmin']:
+    if request.user.is_authenticated():
         # 移除当前步骤中的脚本关联
         verify_id = request.POST.get("verify_id", "")
         try:
@@ -2942,7 +2943,7 @@ def remove_verify_item(request):
 
 
 def get_script_data(request):
-    if request.user.is_authenticated() and request.session['isadmin']:
+    if request.user.is_authenticated():
         if 'id' in request.POST:
             id = request.POST.get('id', '')
             try:
@@ -2976,7 +2977,7 @@ def get_script_data(request):
 
 
 def remove_script(request):
-    if request.user.is_authenticated() and request.session['isadmin']:
+    if request.user.is_authenticated():
         # 移除当前步骤中的脚本关联
         script_id = request.POST.get("script_id", "")
         try:
@@ -3461,8 +3462,22 @@ def get_all_groups(request):
 
 def process_design(request, funid):
     if request.user.is_authenticated():
-        all_main_database = HostsManage.objects.exclude(state="9").filter(host_type='主数据库')
-        all_prepare_database = HostsManage.objects.exclude(state="9").filter(host_type='备数据库')
+        # all_main_database = HostsManage.objects.exclude(state="9").filter(host_type='主数据库')
+        # all_prepare_database = HostsManage.objects.exclude(state="9").filter(host_type='备数据库')
+        all_main_database = []
+        all_prepare_database = []
+        all_hosts = HostsManage.objects.exclude(state="9")
+        for host in all_hosts:
+            if host.host_type == 1:
+                all_main_database.append({
+                    "main_database_id": host.id,
+                    "main_database_name": host.host_name
+                })
+            if host.host_type == 2:
+                all_prepare_database.append({
+                    "prepare_database_id": host.id,
+                    "prepare_database_name": host.host_name
+                })
         return render(request, "processdesign.html",
                       {'username': request.user.userinfo.fullname, "pagefuns": getpagefuns(funid, request=request),
                        'all_main_database': all_main_database, 'all_prepare_database': all_prepare_database
@@ -3470,93 +3485,135 @@ def process_design(request, funid):
 
 
 def process_data(request):
-    if request.user.is_authenticated() and request.session['isadmin']:
+    if request.user.is_authenticated():
         result = []
-        all_process = Process.objects.exclude(state="9").filter(type="cv_oracle").order_by("sort").values()
-        if (len(all_process) > 0):
-            main_hostmanage_ids = [process["main_database"] for process in all_process if process["main_database"]]
-            prepare_hostmanage_ids = [process["prepare_database"] for process in all_process if process["prepare_database"]]
-            hostmanage_ids = main_hostmanage_ids + prepare_hostmanage_ids
+        all_process = Process.objects.exclude(state="9").filter(type="cv_oracle").order_by("sort").\
+            select_related("primary", "standby")
 
-            hostmanage_list = HostsManage.objects.exclude(state="9").filter(id__in=hostmanage_ids).all()
-
+        if all_process.exists():
             for process in all_process:
-                _data = {
-                    "process_id": process["id"],
-                    "process_code": process["code"],
-                    "process_name": process["name"],
-                    "process_remark": process["remark"],
-                    "process_sign": process["sign"],
-                    "process_rto": process["rto"],
-                    "process_rpo": process["rpo"],
-                    "process_sort": process["sort"],
-                    "process_color": process["color"],
-                    "process_main_database": process["main_database"],
-                    "process_prepare_database": process["prepare_database"]
-                }
+                result.append({
+                    "process_id": process.id,
+                    "process_code": process.code,
+                    "process_name": process.name,
+                    "process_remark": process.remark,
+                    "process_sign": process.sign,
+                    "process_rto": process.rto,
+                    "process_rpo": process.rpo,
+                    "process_sort": process.sort,
+                    "process_color": process.color,
+                    "main_database_id": process.primary.id if process.primary else "",
+                    "main_database_name": process.primary.host_name if process.primary else "",
+                    "prepare_database_id": process.standby.id if process.standby else "",
+                    "prepare_database_name": process.standby.host_name if process.standby else ""
+                })
+        print(result)
 
-                for host in hostmanage_list:
-                    if _data["process_main_database"]:
-                        if host.id == int(_data["process_main_database"]):
-                            _data["process_main_database"] = host.host_name
-                            break
-
-                for host in hostmanage_list:
-                    if _data["process_prepare_database"]:
-                        if host.id == int(_data["process_prepare_database"]):
-                            _data["process_prepare_database"] = host.host_name
-                            break
-                result.append(_data)
+        # if (len(all_process) > 0):
+        #     main_hostmanage_ids = [process["main_database"] for process in all_process if process["main_database"]]
+        #     prepare_hostmanage_ids = [process["prepare_database"] for process in all_process if process["prepare_database"]]
+        #     hostmanage_ids = main_hostmanage_ids + prepare_hostmanage_ids
+        #
+        #     hostmanage_list = HostsManage.objects.exclude(state="9").filter(id__in=hostmanage_ids).all()
+        #
+        #     for process in all_process:
+        #         _data = {
+        #             "process_id": process["id"],
+        #             "process_code": process["code"],
+        #             "process_name": process["name"],
+        #             "process_remark": process["remark"],
+        #             "process_sign": process["sign"],
+        #             "process_rto": process["rto"],
+        #             "process_rpo": process["rpo"],
+        #             "process_sort": process["sort"],
+        #             "process_color": process["color"],
+        #             "process_main_database": process["main_database"],
+        #             "process_prepare_database": process["prepare_database"]
+        #         }
+        #
+        #         for host in hostmanage_list:
+        #             if _data["process_main_database"]:
+        #                 if host.id == int(_data["process_main_database"]):
+        #                     _data["process_main_database"] = host.host_name
+        #                     break
+        #
+        #         for host in hostmanage_list:
+        #             if _data["process_prepare_database"]:
+        #                 if host.id == int(_data["process_prepare_database"]):
+        #                     _data["process_prepare_database"] = host.host_name
+        #                     break
+        #         result.append(_data)
         return JsonResponse({"data": result})
 
 
 def process_save(request):
-    if request.user.is_authenticated() and request.session['isadmin']:
-        if 'id' in request.POST:
-            result = {}
-            id = request.POST.get('id', '')
-            code = request.POST.get('code', '')
-            name = request.POST.get('name', '')
-            remark = request.POST.get('remark', '')
-            sign = request.POST.get('sign', '')
-            rto = request.POST.get('rto', '')
-            rpo = request.POST.get('rpo', '')
-            sort = request.POST.get('sort', '')
-            color = request.POST.get('color', '')
-            main_database = request.POST.get('main_database', '')
-            prepare_database = request.POST.get('prepare_database', '')
+    if request.user.is_authenticated():
+        result = {}
+        id = request.POST.get('id', '')
+        code = request.POST.get('code', '')
+        name = request.POST.get('name', '')
+        remark = request.POST.get('remark', '')
+        sign = request.POST.get('sign', '')
+        rto = request.POST.get('rto', '')
+        rpo = request.POST.get('rpo', '')
+        sort = request.POST.get('sort', '')
+        color = request.POST.get('color', '')
+        main_database = request.POST.get('main_database', '')
+        prepare_database = request.POST.get('prepare_database', '')
 
-            try:
-                id = int(id)
-            except:
-                raise Http404()
-            if code.strip() == '':
-                result["res"] = '预案编码不能为空。'
+        try:
+            id = int(id)
+        except:
+            raise Http404()
+        if code.strip() == '':
+            result["res"] = '预案编码不能为空。'
+        else:
+            if name.strip() == '':
+                result["res"] = '预案名称不能为空。'
             else:
-                if name.strip() == '':
-                    result["res"] = '预案名称不能为空。'
+                if sign.strip() == '':
+                    result["res"] = '是否签到不能为空。'
                 else:
-                    if sign.strip() == '':
-                        result["res"] = '是否签到不能为空。'
+                    try:
+                        main_database = int(main_database)
+                    except ValueError as e:
+                        result["res"] = '主数据库不能为空。'
                     else:
-                        if main_database.strip() == '':
-                            result["res"] = '主数据库不能为空。'
+                        try:
+                            prepare_database = int(prepare_database)
+                        except ValueError as e:
+                            result["res"] = '备数据库不能为空。'
                         else:
-                            if prepare_database.strip() == '':
-                                result["res"] = '备数据库不能为空。'
+                            if id == 0:
+                                all_process = Process.objects.filter(code=code).exclude(
+                                    state="9").filter(type="cv_oracle")
+                                if (len(all_process) > 0):
+                                    result["res"] = '预案编码:' + code + '已存在。'
+                                else:
+                                    processsave = Process()
+                                    processsave.url = '/cv_oracle'
+                                    processsave.type = 'cv_oracle'
+                                    processsave.code = code
+                                    processsave.name = name
+                                    processsave.remark = remark
+                                    processsave.sign = sign
+                                    processsave.rto = rto if rto else None
+                                    processsave.rpo = rpo if rpo else None
+                                    processsave.sort = sort if sort else None
+                                    processsave.color = color
+                                    processsave.primary_id = main_database
+                                    processsave.standby_id = prepare_database
+                                    processsave.save()
+                                    result["res"] = "保存成功。"
+                                    result["data"] = processsave.id
                             else:
-                                # if color.strip() == "":
-                                #     result["res"] = '项目图标配色不能为空。'
-                                # else:
-                                if id == 0:
-                                    all_process = Process.objects.filter(code=code).exclude(
-                                        state="9").filter(type="cv_oracle")
-                                    if (len(all_process) > 0):
-                                        result["res"] = '预案编码:' + code + '已存在。'
-                                    else:
-                                        processsave = Process()
-                                        processsave.url = '/cv_oracle'
-                                        processsave.type = 'cv_oracle'
+                                all_process = Script.objects.filter(code=code).exclude(
+                                    id=id).exclude(state="9")
+                                if (len(all_process) > 0):
+                                    result["res"] = '预案编码:' + code + '已存在。'
+                                else:
+                                    try:
+                                        processsave = Process.objects.get(id=id)
                                         processsave.code = code
                                         processsave.name = name
                                         processsave.remark = remark
@@ -3565,34 +3622,13 @@ def process_save(request):
                                         processsave.rpo = rpo if rpo else None
                                         processsave.sort = sort if sort else None
                                         processsave.color = color
-                                        processsave.main_database = main_database
-                                        processsave.prepare_database = prepare_database
+                                        processsave.primary_id = main_database
+                                        processsave.standby_id = prepare_database
                                         processsave.save()
                                         result["res"] = "保存成功。"
                                         result["data"] = processsave.id
-                                else:
-                                    all_process = Script.objects.filter(code=code).exclude(
-                                        id=id).exclude(state="9")
-                                    if (len(all_process) > 0):
-                                        result["res"] = '预案编码:' + code + '已存在。'
-                                    else:
-                                        try:
-                                            processsave = Process.objects.get(id=id)
-                                            processsave.code = code
-                                            processsave.name = name
-                                            processsave.remark = remark
-                                            processsave.sign = sign
-                                            processsave.rto = rto if rto else None
-                                            processsave.rpo = rpo if rpo else None
-                                            processsave.sort = sort if sort else None
-                                            processsave.color = color
-                                            processsave.main_database = main_database
-                                            processsave.prepare_database = prepare_database
-                                            processsave.save()
-                                            result["res"] = "保存成功。"
-                                            result["data"] = processsave.id
-                                        except:
-                                            result["res"] = "修改失败。"
+                                    except:
+                                        result["res"] = "修改失败。"
         return HttpResponse(json.dumps(result))
 
 
@@ -3810,31 +3846,10 @@ def cv_oracle_run(request):
         run_time = request.POST.get('run_time', '')
         run_reason = request.POST.get('run_reason', '')
 
-        target = request.POST.get('target', '')
-        recovery_time = request.POST.get('recovery_time', '')
-        browseJobId = request.POST.get('browseJobId', '')
-        data_path = request.POST.get('data_path', '')
-        copy_priority = request.POST.get('copy_priority', '')
-        db_open = request.POST.get('db_open', '')
-
-        origin = request.POST.get('origin', '')
-
-        try:
-            copy_priority = int(copy_priority)
-        except ValueError as e:
-            copy_priority = 1
-        try:
-            db_open = int(db_open)
-        except ValueError as e:
-            db_open = 1
-
         try:
             processid = int(processid)
         except:
             return JsonResponse({"res": "当前流程不存在。"})
-
-        # if not data_path.strip():
-        #     return JsonResponse({"res": "数据文件重定向路径不能为空。"})
 
         if not origin.strip():
             return JsonResponse({"res": "流程步骤中未添加Commvault接口，导致源客户端未空。"})
@@ -3862,12 +3877,7 @@ def cv_oracle_run(request):
                     myprocessrun.creatuser = request.user.username
                     myprocessrun.run_reason = run_reason
                     myprocessrun.state = "RUN"
-                    myprocessrun.target_id = target
-                    myprocessrun.browse_job_id = browseJobId
-                    myprocessrun.data_path = data_path
-                    myprocessrun.copy_priority = copy_priority
-                    myprocessrun.db_open = db_open
-                    myprocessrun.origin = origin
+
                     myprocessrun.recover_time = datetime.datetime.strptime(recovery_time,
                                                                            "%Y-%m-%d %H:%M:%S") if recovery_time else None
 
@@ -3950,7 +3960,7 @@ def cv_oracle_run(request):
 
 
 def cv_oracle_run_invited(request):
-    if request.user.is_authenticated() and request.session['isadmin']:
+    if request.user.is_authenticated():
         result = {}
         process_id = request.POST.get('processid', '')
         run_person = request.POST.get('run_person', '')
@@ -6710,6 +6720,7 @@ def host_save(request):
         host_type = request.POST.get("host_type", "")
         oracle_name = request.POST.get("oracle_name", "")
         oracle_password = request.POST.get("oracle_password", "")
+        oracle_instance = request.POST.get("oracle_instance", "")
 
         ret = 0
         info = ""
@@ -6725,19 +6736,46 @@ def host_save(request):
                         if connect_type.strip():
                             if username.strip():
                                 if password.strip():
-                                    if host_type.strip():
+                                    try:
+                                        host_type = int(host_type)
+                                    except ValueError as e:
+                                        ret = 0
+                                        info = "主机类型未选择"
+                                    else:
                                         if oracle_name.strip():
                                             if oracle_password.strip():
-                                                # 新增
-                                                if host_id == 0:
-                                                    # 判断主机是否已经存在
-                                                    check_host_manage = HostsManage.objects.filter(host_ip=host_ip)
-                                                    if check_host_manage.exists():
-                                                        ret = 0
-                                                        info = "主机已经存在，请勿重复添加。"
+                                                if oracle_instance.strip():
+                                                    # 新增
+                                                    if host_id == 0:
+                                                        # 判断主机是否已经存在
+                                                        check_host_manage = HostsManage.objects.filter(host_ip=host_ip)
+                                                        if check_host_manage.exists():
+                                                            ret = 0
+                                                            info = "主机已经存在，请勿重复添加。"
+                                                        else:
+                                                            try:
+                                                                cur_host_manage = HostsManage()
+                                                                cur_host_manage.host_ip = host_ip
+                                                                cur_host_manage.host_name = host_name
+                                                                cur_host_manage.os = host_os
+                                                                cur_host_manage.type = connect_type
+                                                                cur_host_manage.username = username
+                                                                cur_host_manage.password = password
+                                                                cur_host_manage.host_type = host_type
+                                                                cur_host_manage.oracle_name = oracle_name
+                                                                cur_host_manage.oracle_password = oracle_password
+                                                                cur_host_manage.oracle_instance = oracle_instance
+                                                                cur_host_manage.save()
+                                                            except:
+                                                                ret = 0
+                                                                info = "服务器异常。"
+                                                            else:
+                                                                ret = 1
+                                                                info = "新增主机成功。"
                                                     else:
+                                                        # 修改
                                                         try:
-                                                            cur_host_manage = HostsManage()
+                                                            cur_host_manage = HostsManage.objects.get(id=host_id)
                                                             cur_host_manage.host_ip = host_ip
                                                             cur_host_manage.host_name = host_name
                                                             cur_host_manage.os = host_os
@@ -6747,42 +6785,23 @@ def host_save(request):
                                                             cur_host_manage.host_type = host_type
                                                             cur_host_manage.oracle_name = oracle_name
                                                             cur_host_manage.oracle_password = oracle_password
+                                                            cur_host_manage.oracle_instance = oracle_instance
                                                             cur_host_manage.save()
+
+                                                            ret = 1
+                                                            info = "主机信息修改成功。"
                                                         except:
                                                             ret = 0
                                                             info = "服务器异常。"
-                                                        else:
-                                                            ret = 1
-                                                            info = "新增主机成功。"
                                                 else:
-                                                    # 修改
-                                                    try:
-                                                        cur_host_manage = HostsManage.objects.get(id=host_id)
-                                                        cur_host_manage.host_ip = host_ip
-                                                        cur_host_manage.host_name = host_name
-                                                        cur_host_manage.os = host_os
-                                                        cur_host_manage.type = connect_type
-                                                        cur_host_manage.username = username
-                                                        cur_host_manage.password = password
-                                                        cur_host_manage.host_type = host_type
-                                                        cur_host_manage.oracle_name = oracle_name
-                                                        cur_host_manage.oracle_password = oracle_password
-                                                        cur_host_manage.save()
-
-                                                        ret = 1
-                                                        info = "主机信息修改成功。"
-                                                    except:
-                                                        ret = 0
-                                                        info = "服务器异常。"
+                                                    ret = 0
+                                                    info = "oracle实例未填写"
                                             else:
                                                 ret = 0
                                                 info = "oracle密码未填写"
                                         else:
                                             ret = 0
                                             info = "oracle用户名未填写"
-                                    else:
-                                        ret = 0
-                                        info = "主机类型未选择"
                                 else:
                                     ret = 0
                                     info = "密码未填写。"
@@ -6822,9 +6841,11 @@ def hosts_manage_data(request):
                 "type": host_manage.type,
                 "username": host_manage.username,
                 "password": host_manage.password,
-                "host_type": host_manage.host_type,
+                "host_type_value": host_manage.host_type,
+                "host_type_name": host_manage.get_host_type_display(),
                 "oracle_name": host_manage.oracle_name,
-                "oracle_password": host_manage.oracle_password
+                "oracle_password": host_manage.oracle_password,
+                "oracle_instance": host_manage.oracle_instance
             })
         return JsonResponse({"data": all_hm_list})
     else:
@@ -6861,7 +6882,7 @@ def hosts_manage_del(request):
 
 
 def serverconfig(request, funid):
-    if request.user.is_authenticated() and request.session['isadmin']:
+    if request.user.is_authenticated():
         cvvendor = Vendor.objects.first()
         id = 0
         webaddr = ""
@@ -7199,7 +7220,6 @@ def dooraclerecovery(request):
                 return HttpResponse("恢复任务启动失败, 数据库实例不存在。")
             oraRestoreOperator = {"restoreTime": restoreTime, "browseJobId": None, "data_path": data_path,
                                   "copy_priority": copy_priority}
-            print("111111", oraRestoreOperator)
 
             cvToken = CV_RestApi_Token()
             cvToken.login(settings.CVApi_credit)
@@ -7258,7 +7278,6 @@ def process_schedule_save(request):
         per_week = request.POST.get('per_week', '')
         ret = 1
         info = ""
-        print(request.user.username)
 
         if not process_schedule_name:
             return JsonResponse({
@@ -7519,5 +7538,76 @@ def process_schedule_del(request):
             "ret": ret,
             "info": info
         })
+    else:
+        return HttpResponseRedirect("/login")
+
+
+def get_oracle_status(request):
+    if request.user.is_authenticated():
+        process_id = request.POST.get('process_id', "")
+
+        try:
+            process = Process.objects.get(id=process_id)
+        except Process.DoesNotExist as e:
+            return JsonResponse({
+                "ret": 0,
+                "data": []
+            })
+        else:
+
+            host_list = [process.primary, process.standby]
+
+            adg_info_list = []
+            for host in host_list:
+                db_status = ''
+                database_role = ''
+                switchover_status = ''
+                host_status = 1 # 1为连接，0为断开
+                host_name = host.host_name
+                host_ip = host.host_ip
+                host_password = host.password
+                host_username = host.username
+                # oracle用户名/密码
+                oracle_name = host.oracle_name
+                oracle_password = host.oracle_password
+                oracle_instance = host.oracle_instance
+                host_os = host.os
+
+                try:
+                    conn = cx_Oracle.connect('{oracle_name}/{oracle_password}@{host_ip}/{oracle_instance}'.format(
+                        oracle_name=oracle_name, oracle_password=oracle_password, host_ip=host_ip, oracle_instance=oracle_instance))
+                    curs = conn.cursor()
+                    a_db_status_sql = 'SELECT status FROM v$instance'
+                    curs.execute(a_db_status_sql)
+                    db_status_row = curs.fetchone()
+                    db_status = db_status_row[0] if db_status_row else ""
+
+                    adg_info_sql = 'SELECT switchover_status,database_role FROM v$database'
+                    curs.execute(adg_info_sql)
+                    adg_info_row = curs.fetchone()
+                    database_role = adg_info_row[0] if adg_info_row else ""
+                    switchover_status = adg_info_row[1] if adg_info_row else ""
+                except Exception as e:
+                    check_host = ServerByPara('cd ..', host_ip, host_username, host_password, host_os)
+                    result = check_host.run("")
+                    if result["exec_tag"] == "1":
+                        host_status = 0
+                else:
+                    curs.close()
+                    conn.close()
+
+                adg_info_list.append({
+                    "db_status": db_status,
+                    "database_role": database_role,
+                    "switchover_status": switchover_status,
+                    "host_status": host_status,
+                    "host_name": host_name,
+                    "host_ip": host_ip
+                })
+
+            return JsonResponse({
+                "ret": 1,
+                "data": adg_info_list
+            })
     else:
         return HttpResponseRedirect("/login")

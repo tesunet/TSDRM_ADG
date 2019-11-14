@@ -170,4 +170,7 @@ urlpatterns = [
     url(r'^process_schedule_data/$', process_schedule_data),
     url(r'^change_periodictask/$', change_periodictask),
     url(r'^process_schedule_del/$', process_schedule_del),
+
+    # 获取Oracle数据库状态
+    url(r'^get_oracle_status/$', get_oracle_status),
 ]

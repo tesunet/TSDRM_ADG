@@ -14,8 +14,8 @@ $(document).ready(function () {
             {"data": "process_rpo"},
             {"data": "process_sort"},
             {"data": "process_color"},
-            {"data": "process_main_database"},
-            {"data": "process_prepare_database"},
+            {"data": "main_database_name"},
+            {"data": "prepare_database_name"},
 
             {"data": null}
         ],
@@ -96,9 +96,9 @@ $(document).ready(function () {
         $("#rpo").val(data.process_rpo);
         $("#sort").val(data.process_sort);
         $("#process_color").val(data.process_color);
-        $("#process_main_database").val(data.process_main_database);
-        $("#process_prepare_database").val(data.process_prepare_database);
-
+        $("#process_main_database").val(data.main_database_id);
+        $("#process_prepare_database").val(data.prepare_database_id);
+        console.log(data)
     });
 
     $("#new").click(function () {
@@ -136,7 +136,7 @@ $(document).ready(function () {
                     sort: $("#sort").val(),
                     color: $("#process_color").val(),
                     main_database: $("#process_main_database").val(),
-                    prepare_database: $("#process_prepare_database").val(),
+                    prepare_database: $("#process_prepare_database").val()
 
                 },
             success: function (data) {

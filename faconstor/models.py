@@ -78,13 +78,20 @@ class HostsManage(models.Model):
     username = models.CharField("用户名", blank=True, null=True, max_length=50)
     password = models.CharField("密码", blank=True, null=True, max_length=50)
     state = models.CharField("状态", blank=True, null=True, max_length=20)
-    host_type = models.CharField("主机类型", blank=True, null=True, max_length=20)
+
+    host_type_choices = (
+        (1, "主数据库"),
+        (2, "备数据库"),
+        (3, "其他")
+    )
+
+    host_type = models.IntegerField("主机类型", null=True, choices=host_type_choices)
     oracle_name = models.CharField("oracle用户名", blank=True, null=True, max_length=50)
     oracle_password = models.CharField("oracle密码", blank=True, null=True, max_length=50)
+    oracle_instance = models.CharField("oracle实例名称", blank=True, null=True, max_length=50)
 
 
 class Process(models.Model):
-    hosts_manage = models.ForeignKey(HostsManage, blank=True, null=True, verbose_name='主机管理')
     code = models.CharField("预案编号", blank=True, max_length=50)
     name = models.CharField("预案名称", blank=True, max_length=50)
     remark = models.TextField("预案描述", blank=True, null=True)
@@ -96,8 +103,8 @@ class Process(models.Model):
     url = models.CharField("页面链接", blank=True, max_length=100)
     type = models.CharField("预案类型", blank=True, max_length=100, null=True)
     color = models.CharField("颜色", blank=True, max_length=50)
-    main_database = models.CharField("主数据库", blank=True, null=True, max_length=50)
-    prepare_database = models.CharField("备数据库", blank=True, null=True, max_length=50)
+    primary = models.ForeignKey(HostsManage, blank=True, null=True, verbose_name='主数据库', related_name="process_primary_set")
+    standby = models.ForeignKey(HostsManage, blank=True, null=True, verbose_name='备数据库', related_name="process_standby_set")
 
 
 class Step(models.Model):
