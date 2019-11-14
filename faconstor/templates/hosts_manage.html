@@ -29,7 +29,12 @@
             <th> 连接类型</th>
             <th> 用户名</th>
             <th> 密码</th>
+
+            <th> 主机类型</th>
+            <th> oracle用户名</th>
+            <th> oracle密码</th>
             <th style="width:50px;"> 操作</th>
+
         </tr>
         </thead>
         <tbody>
@@ -37,7 +42,7 @@
     </table>
     <div id="static" class="modal fade" tabindex="-1" data-backdrop="static" data-keyboard="false">
         <div class="modal-dialog">
-            <div class="modal-content">
+            <div class="modal-content" style="width: 700px">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal" aria-hidden="true"></button>
                     <h4 class="modal-title">主机管理</h4>
@@ -90,6 +95,38 @@
                                 <label class="col-md-2 control-label"><span style="color:red; ">*</span>密码</label>
                                 <div class="col-md-10">
                                     <input id="password" type="password" name="password" class="form-control "
+                                           placeholder="">
+                                    <div class="form-control-focus"></div>
+                                </div>
+                            </div>
+
+                             <div class="form-group">
+                                <label class="col-md-2 control-label"><span style="color:red; ">*</span>主机类型</label>
+                                <div class="col-md-10">
+                                    <select class="form-control" id="host_type" name="host_type">
+                                        <option value="主数据库">主数据库</option>
+                                        <option value="备数据库">备数据库</option>
+                                        <option value="其他">其他</option>
+                                    </select>
+                                    <div class="form-control-focus"></div>
+
+                                </div>
+                            </div>
+
+
+
+                            <div class="form-group">
+                                <label class="col-md-2 control-label"><span style="color:red; ">*</span>oracle用户名</label>
+                                <div class="col-md-10">
+                                    <input id="oracle_name" type="text" name="oracle_name" class="form-control "
+                                           placeholder="">
+                                    <div class="form-control-focus"></div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="col-md-2 control-label"><span style="color:red; ">*</span>oracle密码</label>
+                                <div class="col-md-10">
+                                    <input id="oracle_password" type="password" name="oracle_password" class="form-control "
                                            placeholder="">
                                     <div class="form-control-focus"></div>
                                 </div>

@@ -14,6 +14,9 @@ $(document).ready(function () {
             {"data": "process_rpo"},
             {"data": "process_sort"},
             {"data": "process_color"},
+            {"data": "process_main_database"},
+            {"data": "process_prepare_database"},
+
             {"data": null}
         ],
 
@@ -93,6 +96,9 @@ $(document).ready(function () {
         $("#rpo").val(data.process_rpo);
         $("#sort").val(data.process_sort);
         $("#process_color").val(data.process_color);
+        $("#process_main_database").val(data.process_main_database);
+        $("#process_prepare_database").val(data.process_prepare_database);
+
     });
 
     $("#new").click(function () {
@@ -105,6 +111,10 @@ $(document).ready(function () {
         $("#rpo").val("");
         $("#sort").val("");
         $("#process_color").val("");
+        $("#process_main_database").val("");
+        $("#process_prepare_database").val("");
+
+
     });
 
     $('#save').click(function () {
@@ -125,6 +135,9 @@ $(document).ready(function () {
                     rpo: $("#rpo").val(),
                     sort: $("#sort").val(),
                     color: $("#process_color").val(),
+                    main_database: $("#process_main_database").val(),
+                    prepare_database: $("#process_prepare_database").val(),
+
                 },
             success: function (data) {
                 var myres = data["res"];

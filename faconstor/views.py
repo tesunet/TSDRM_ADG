@@ -3461,8 +3461,12 @@ def get_all_groups(request):
 
 def process_design(request, funid):
     if request.user.is_authenticated():
+        all_main_database = HostsManage.objects.exclude(state="9").filter(host_type='主数据库')
+        all_prepare_database = HostsManage.objects.exclude(state="9").filter(host_type='备数据库')
         return render(request, "processdesign.html",
-                      {'username': request.user.userinfo.fullname, "pagefuns": getpagefuns(funid, request=request)})
+                      {'username': request.user.userinfo.fullname, "pagefuns": getpagefuns(funid, request=request),
+                       'all_main_database': all_main_database, 'all_prepare_database': all_prepare_database
+                       })
 
 
 def process_data(request):
@@ -3470,8 +3474,14 @@ def process_data(request):
         result = []
         all_process = Process.objects.exclude(state="9").filter(type="cv_oracle").order_by("sort").values()
         if (len(all_process) > 0):
+            main_hostmanage_ids = [process["main_database"] for process in all_process if process["main_database"]]
+            prepare_hostmanage_ids = [process["prepare_database"] for process in all_process if process["prepare_database"]]
+            hostmanage_ids = main_hostmanage_ids + prepare_hostmanage_ids
+
+            hostmanage_list = HostsManage.objects.exclude(state="9").filter(id__in=hostmanage_ids).all()
+
             for process in all_process:
-                result.append({
+                _data = {
                     "process_id": process["id"],
                     "process_code": process["code"],
                     "process_name": process["name"],
@@ -3481,7 +3491,22 @@ def process_data(request):
                     "process_rpo": process["rpo"],
                     "process_sort": process["sort"],
                     "process_color": process["color"],
-                })
+                    "process_main_database": process["main_database"],
+                    "process_prepare_database": process["prepare_database"]
+                }
+
+                for host in hostmanage_list:
+                    if _data["process_main_database"]:
+                        if host.id == int(_data["process_main_database"]):
+                            _data["process_main_database"] = host.host_name
+                            break
+
+                for host in hostmanage_list:
+                    if _data["process_prepare_database"]:
+                        if host.id == int(_data["process_prepare_database"]):
+                            _data["process_prepare_database"] = host.host_name
+                            break
+                result.append(_data)
         return JsonResponse({"data": result})
 
 
@@ -3498,6 +3523,9 @@ def process_save(request):
             rpo = request.POST.get('rpo', '')
             sort = request.POST.get('sort', '')
             color = request.POST.get('color', '')
+            main_database = request.POST.get('main_database', '')
+            prepare_database = request.POST.get('prepare_database', '')
+
             try:
                 id = int(id)
             except:
@@ -3511,50 +3539,60 @@ def process_save(request):
                     if sign.strip() == '':
                         result["res"] = '是否签到不能为空。'
                     else:
-                        # if color.strip() == "":
-                        #     result["res"] = '项目图标配色不能为空。'
-                        # else:
-                        if id == 0:
-                            all_process = Process.objects.filter(code=code).exclude(
-                                state="9").filter(type="cv_oracle")
-                            if (len(all_process) > 0):
-                                result["res"] = '预案编码:' + code + '已存在。'
-                            else:
-                                processsave = Process()
-                                processsave.url = '/cv_oracle'
-                                processsave.type = 'cv_oracle'
-                                processsave.code = code
-                                processsave.name = name
-                                processsave.remark = remark
-                                processsave.sign = sign
-                                processsave.rto = rto if rto else None
-                                processsave.rpo = rpo if rpo else None
-                                processsave.sort = sort if sort else None
-                                processsave.color = color
-                                processsave.save()
-                                result["res"] = "保存成功。"
-                                result["data"] = processsave.id
+                        if main_database.strip() == '':
+                            result["res"] = '主数据库不能为空。'
                         else:
-                            all_process = Script.objects.filter(code=code).exclude(
-                                id=id).exclude(state="9")
-                            if (len(all_process) > 0):
-                                result["res"] = '预案编码:' + code + '已存在。'
+                            if prepare_database.strip() == '':
+                                result["res"] = '备数据库不能为空。'
                             else:
-                                try:
-                                    processsave = Process.objects.get(id=id)
-                                    processsave.code = code
-                                    processsave.name = name
-                                    processsave.remark = remark
-                                    processsave.sign = sign
-                                    processsave.rto = rto if rto else None
-                                    processsave.rpo = rpo if rpo else None
-                                    processsave.sort = sort if sort else None
-                                    processsave.color = color
-                                    processsave.save()
-                                    result["res"] = "保存成功。"
-                                    result["data"] = processsave.id
-                                except:
-                                    result["res"] = "修改失败。"
+                                # if color.strip() == "":
+                                #     result["res"] = '项目图标配色不能为空。'
+                                # else:
+                                if id == 0:
+                                    all_process = Process.objects.filter(code=code).exclude(
+                                        state="9").filter(type="cv_oracle")
+                                    if (len(all_process) > 0):
+                                        result["res"] = '预案编码:' + code + '已存在。'
+                                    else:
+                                        processsave = Process()
+                                        processsave.url = '/cv_oracle'
+                                        processsave.type = 'cv_oracle'
+                                        processsave.code = code
+                                        processsave.name = name
+                                        processsave.remark = remark
+                                        processsave.sign = sign
+                                        processsave.rto = rto if rto else None
+                                        processsave.rpo = rpo if rpo else None
+                                        processsave.sort = sort if sort else None
+                                        processsave.color = color
+                                        processsave.main_database = main_database
+                                        processsave.prepare_database = prepare_database
+                                        processsave.save()
+                                        result["res"] = "保存成功。"
+                                        result["data"] = processsave.id
+                                else:
+                                    all_process = Script.objects.filter(code=code).exclude(
+                                        id=id).exclude(state="9")
+                                    if (len(all_process) > 0):
+                                        result["res"] = '预案编码:' + code + '已存在。'
+                                    else:
+                                        try:
+                                            processsave = Process.objects.get(id=id)
+                                            processsave.code = code
+                                            processsave.name = name
+                                            processsave.remark = remark
+                                            processsave.sign = sign
+                                            processsave.rto = rto if rto else None
+                                            processsave.rpo = rpo if rpo else None
+                                            processsave.sort = sort if sort else None
+                                            processsave.color = color
+                                            processsave.main_database = main_database
+                                            processsave.prepare_database = prepare_database
+                                            processsave.save()
+                                            result["res"] = "保存成功。"
+                                            result["data"] = processsave.id
+                                        except:
+                                            result["res"] = "修改失败。"
         return HttpResponse(json.dumps(result))
 
 
@@ -6669,6 +6707,10 @@ def host_save(request):
         connect_type = request.POST.get("type", "")
         username = request.POST.get("username", "")
         password = request.POST.get("password", "")
+        host_type = request.POST.get("host_type", "")
+        oracle_name = request.POST.get("oracle_name", "")
+        oracle_password = request.POST.get("oracle_password", "")
+
         ret = 0
         info = ""
         try:
@@ -6683,46 +6725,64 @@ def host_save(request):
                         if connect_type.strip():
                             if username.strip():
                                 if password.strip():
-                                    # 新增
-                                    if host_id == 0:
-                                        # 判断主机是否已经存在
-                                        check_host_manage = HostsManage.objects.filter(host_ip=host_ip)
-                                        if check_host_manage.exists():
-                                            ret = 0
-                                            info = "主机已经存在，请勿重复添加。"
-                                        else:
-                                            try:
-                                                cur_host_manage = HostsManage()
-                                                cur_host_manage.host_ip = host_ip
-                                                cur_host_manage.host_name = host_name
-                                                cur_host_manage.os = host_os
-                                                cur_host_manage.type = connect_type
-                                                cur_host_manage.username = username
-                                                cur_host_manage.password = password
-                                                cur_host_manage.save()
-                                            except:
-                                                ret = 0
-                                                info = "服务器异常。"
-                                            else:
-                                                ret = 1
-                                                info = "新增主机成功。"
-                                    else:
-                                        # 修改
-                                        try:
-                                            cur_host_manage = HostsManage.objects.get(id=host_id)
-                                            cur_host_manage.host_ip = host_ip
-                                            cur_host_manage.host_name = host_name
-                                            cur_host_manage.os = host_os
-                                            cur_host_manage.type = connect_type
-                                            cur_host_manage.username = username
-                                            cur_host_manage.password = password
-                                            cur_host_manage.save()
+                                    if host_type.strip():
+                                        if oracle_name.strip():
+                                            if oracle_password.strip():
+                                                # 新增
+                                                if host_id == 0:
+                                                    # 判断主机是否已经存在
+                                                    check_host_manage = HostsManage.objects.filter(host_ip=host_ip)
+                                                    if check_host_manage.exists():
+                                                        ret = 0
+                                                        info = "主机已经存在，请勿重复添加。"
+                                                    else:
+                                                        try:
+                                                            cur_host_manage = HostsManage()
+                                                            cur_host_manage.host_ip = host_ip
+                                                            cur_host_manage.host_name = host_name
+                                                            cur_host_manage.os = host_os
+                                                            cur_host_manage.type = connect_type
+                                                            cur_host_manage.username = username
+                                                            cur_host_manage.password = password
+                                                            cur_host_manage.host_type = host_type
+                                                            cur_host_manage.oracle_name = oracle_name
+                                                            cur_host_manage.oracle_password = oracle_password
+                                                            cur_host_manage.save()
+                                                        except:
+                                                            ret = 0
+                                                            info = "服务器异常。"
+                                                        else:
+                                                            ret = 1
+                                                            info = "新增主机成功。"
+                                                else:
+                                                    # 修改
+                                                    try:
+                                                        cur_host_manage = HostsManage.objects.get(id=host_id)
+                                                        cur_host_manage.host_ip = host_ip
+                                                        cur_host_manage.host_name = host_name
+                                                        cur_host_manage.os = host_os
+                                                        cur_host_manage.type = connect_type
+                                                        cur_host_manage.username = username
+                                                        cur_host_manage.password = password
+                                                        cur_host_manage.host_type = host_type
+                                                        cur_host_manage.oracle_name = oracle_name
+                                                        cur_host_manage.oracle_password = oracle_password
+                                                        cur_host_manage.save()
 
-                                            ret = 1
-                                            info = "主机信息修改成功。"
-                                        except:
+                                                        ret = 1
+                                                        info = "主机信息修改成功。"
+                                                    except:
+                                                        ret = 0
+                                                        info = "服务器异常。"
+                                            else:
+                                                ret = 0
+                                                info = "oracle密码未填写"
+                                        else:
                                             ret = 0
-                                            info = "服务器异常。"
+                                            info = "oracle用户名未填写"
+                                    else:
+                                        ret = 0
+                                        info = "主机类型未选择"
                                 else:
                                     ret = 0
                                     info = "密码未填写。"
@@ -6761,7 +6821,10 @@ def hosts_manage_data(request):
                 "os": host_manage.os,
                 "type": host_manage.type,
                 "username": host_manage.username,
-                "password": host_manage.password
+                "password": host_manage.password,
+                "host_type": host_manage.host_type,
+                "oracle_name": host_manage.oracle_name,
+                "oracle_password": host_manage.oracle_password
             })
         return JsonResponse({"data": all_hm_list})
     else:

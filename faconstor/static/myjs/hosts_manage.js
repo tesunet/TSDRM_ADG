@@ -12,13 +12,19 @@ $(document).ready(function () {
             {"data": "type"},
             {"data": "username"},
             {"data": "password"},
+            {"data": "host_type"},
+            {"data": "oracle_name"},
+            {"data": "oracle_password"},
             {"data": null}
         ],
 
         "columnDefs": [{
-            "targets": -2,
+            "targets": -5,
             "visible": false,
-        }, {
+        }, {"targets": -2,
+            "visible": false,
+        },
+            {
             "targets": -1,
             "data": null,
             "width": "100px",
@@ -76,6 +82,9 @@ $(document).ready(function () {
         $("#type").val(data.type);
         $("#username").val(data.username);
         $("#password").val(data.password);
+        $("#host_type").val(data.host_type);
+        $("#oracle_name").val(data.oracle_name);
+        $("#oracle_password").val(data.oracle_password);
     });
 
     $("#new").click(function () {
@@ -86,6 +95,9 @@ $(document).ready(function () {
         $("#type").val("");
         $("#username").val("");
         $("#password").val("");
+        $("#host_type").val("");
+        $("#oracle_name").val("");
+        $("#oracle_password").val("");
     });
 
     $('#save').click(function () {
@@ -103,6 +115,9 @@ $(document).ready(function () {
                 type: $("#type").val(),
                 username: $("#username").val(),
                 password: $("#password").val(),
+                host_type:$("#host_type").val(),
+                oracle_name:$("#oracle_name").val(),
+                oracle_password:$("#oracle_password").val(),
             },
             success: function (data) {
                 if (data.ret == 1) {

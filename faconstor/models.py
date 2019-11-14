@@ -39,41 +39,6 @@ class UserInfo(models.Model):
     forgetpassword = models.CharField("修改密码地址", blank=True, null=True, max_length=50)
 
 
-class Process(models.Model):
-    code = models.CharField("预案编号", blank=True, max_length=50)
-    name = models.CharField("预案名称", blank=True, max_length=50)
-    remark = models.TextField("预案描述", blank=True, null=True)
-    sign = models.CharField("是否签到", blank=True, null=True, max_length=20)
-    rto = models.IntegerField("RTO", blank=True, null=True)
-    rpo = models.IntegerField("RPO", blank=True, null=True)
-    state = models.CharField("状态", blank=True, null=True, max_length=20)
-    sort = models.IntegerField("排序", blank=True, null=True)
-    url = models.CharField("页面链接", blank=True, max_length=100)
-    type = models.CharField("预案类型", blank=True, max_length=100, null=True)
-    color = models.CharField("颜色", blank=True, max_length=50)
-
-
-class Step(models.Model):
-    process = models.ForeignKey(Process)
-    last = models.ForeignKey('self', blank=True, null=True, related_name='next', verbose_name='上一步')
-    pnode = models.ForeignKey('self', blank=True, null=True, related_name='children', verbose_name='父节点')
-    code = models.CharField("步骤编号", blank=True, null=True, max_length=50)
-    name = models.CharField("步骤名称", blank=True, null=True, max_length=50)
-    approval = models.CharField("是否审批", blank=True, null=True, max_length=10)
-    skip = models.CharField("能否跳过", blank=True, null=True, max_length=10)
-    group = models.CharField("角色", blank=True, null=True, max_length=50)
-    time = models.IntegerField("预计耗时", blank=True, null=True)
-    state = models.CharField("状态", blank=True, null=True, max_length=10)
-    sort = models.IntegerField("排序", blank=True, null=True)
-    rto_count_in = models.CharField("是否算入RTO", blank=True, null=True, max_length=10, default="1")
-    remark = models.CharField("备注", blank=True, null=True, max_length=500, help_text="告知业务人员灾备环境地址等信息")
-    force_exec_choices = (
-        (1, "是"),
-        (2, "否")
-    )
-    force_exec = models.IntegerField("流程关闭时强制执行", choices=force_exec_choices, null=True, default=2)
-
-
 # 客户端管理
 class Target(models.Model):
     client_id = models.IntegerField("终端client_id", blank=True, null=True)
@@ -113,6 +78,47 @@ class HostsManage(models.Model):
     username = models.CharField("用户名", blank=True, null=True, max_length=50)
     password = models.CharField("密码", blank=True, null=True, max_length=50)
     state = models.CharField("状态", blank=True, null=True, max_length=20)
+    host_type = models.CharField("主机类型", blank=True, null=True, max_length=20)
+    oracle_name = models.CharField("oracle用户名", blank=True, null=True, max_length=50)
+    oracle_password = models.CharField("oracle密码", blank=True, null=True, max_length=50)
+
+
+class Process(models.Model):
+    hosts_manage = models.ForeignKey(HostsManage, blank=True, null=True, verbose_name='主机管理')
+    code = models.CharField("预案编号", blank=True, max_length=50)
+    name = models.CharField("预案名称", blank=True, max_length=50)
+    remark = models.TextField("预案描述", blank=True, null=True)
+    sign = models.CharField("是否签到", blank=True, null=True, max_length=20)
+    rto = models.IntegerField("RTO", blank=True, null=True)
+    rpo = models.IntegerField("RPO", blank=True, null=True)
+    state = models.CharField("状态", blank=True, null=True, max_length=20)
+    sort = models.IntegerField("排序", blank=True, null=True)
+    url = models.CharField("页面链接", blank=True, max_length=100)
+    type = models.CharField("预案类型", blank=True, max_length=100, null=True)
+    color = models.CharField("颜色", blank=True, max_length=50)
+    main_database = models.CharField("主数据库", blank=True, null=True, max_length=50)
+    prepare_database = models.CharField("备数据库", blank=True, null=True, max_length=50)
+
+
+class Step(models.Model):
+    process = models.ForeignKey(Process)
+    last = models.ForeignKey('self', blank=True, null=True, related_name='next', verbose_name='上一步')
+    pnode = models.ForeignKey('self', blank=True, null=True, related_name='children', verbose_name='父节点')
+    code = models.CharField("步骤编号", blank=True, null=True, max_length=50)
+    name = models.CharField("步骤名称", blank=True, null=True, max_length=50)
+    approval = models.CharField("是否审批", blank=True, null=True, max_length=10)
+    skip = models.CharField("能否跳过", blank=True, null=True, max_length=10)
+    group = models.CharField("角色", blank=True, null=True, max_length=50)
+    time = models.IntegerField("预计耗时", blank=True, null=True)
+    state = models.CharField("状态", blank=True, null=True, max_length=10)
+    sort = models.IntegerField("排序", blank=True, null=True)
+    rto_count_in = models.CharField("是否算入RTO", blank=True, null=True, max_length=10, default="1")
+    remark = models.CharField("备注", blank=True, null=True, max_length=500, help_text="告知业务人员灾备环境地址等信息")
+    force_exec_choices = (
+        (1, "是"),
+        (2, "否")
+    )
+    force_exec = models.IntegerField("流程关闭时强制执行", choices=force_exec_choices, null=True, default=2)
 
 
 class Script(models.Model):
