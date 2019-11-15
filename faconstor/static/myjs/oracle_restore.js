@@ -150,6 +150,42 @@ $(document).ready(function () {
         $("input[name='recovery_time_redio'][value='2']").prop("checked", false);
     });
 
+    /*
+    var curHref = window.href;
+    var global_end = false;
+    if (curHref.indexOf("oracle_restore") != -1) {
+        setTimeout(function () {
+            if (!global_end) {
+                // 处理时对end标志进行修改，end=True表示停止（取消定时器）。
+                $.ajax({
+                    type: "POST",
+                    dataType: 'json',
+                    url: "../get_oracle_status/",
+                    data:
+                        {
+                            process_id: $("#process_id").val()
+                        },
+                    success: function (data) {
+                        //..
+                        console.log(data);
+                        $("#test").val(JSON.stringify(data["data"]) + "\n" + "host_status:主机状态,host_ip:主机IP，switchover_status:切换状态,database_role:切换角色,host_name:主机名称,db_status:数据库状态");
+                    },
+                    error: function (e) {
+                        alert("获取邀请函数据失败，请于管理员联系。");
+                    }
+                });
+
+                // 循环(arguments.callee获取当前执行函数的引用)
+                setTimeout(arguments.callee, 10000);
+            } else {
+                global_end = false;
+            }
+        }, 10000);
+    } else {
+        global_end = true;
+    }
+    */
+
     $.ajax({
         type: "POST",
         dataType: 'json',
@@ -161,7 +197,7 @@ $(document).ready(function () {
         success: function (data) {
             //..
             console.log(data);
-            $("#test").val(JSON.stringify(data["data"])+ "\n" + "host_status:主机状态,host_ip:主机IP，switchover_status:切换状态,database_role:切换角色,host_name:主机名称,db_status:数据库状态");
+            $("#test").val(JSON.stringify(data["data"]) + "\n" + "host_status:主机状态,host_ip:主机IP，switchover_status:切换状态,database_role:切换角色,host_name:主机名称,db_status:数据库状态");
         },
         error: function (e) {
             alert("获取邀请函数据失败，请于管理员联系。");
