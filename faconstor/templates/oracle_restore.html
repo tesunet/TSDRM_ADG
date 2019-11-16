@@ -6,9 +6,33 @@
     <div style="height:10px"></div>
 
     <div class="row" style="height: 400px">
-        <div class="col-md-12">
-            <textarea name="" id="test" cols="10" rows="5" style="margin: 0px; width: 672px; height: 162px;"></textarea>
+        <div align="right" class="col-md-4">
+            <div align="center" style="width: 300px">
+                <img class="ldbimg" style="width: 300px" src="/static/new/images/db3.png">
+                <h3 style="font-weight:800" class="ldbname"></h3>
+            </div>
         </div>
+        <div align="center" style="padding-top: 100px"  class="col-md-4">
+            <img class="sync" style="width: 500px" src="/static/new/images/sync_r.png">
+        </div>
+
+        <div align="left" class="col-md-4">
+            <div align="center" style="width: 300px">
+                <img class="rdbimg"  style="width: 300px" src="/static/new/images/db3.png">
+                <h3 style="font-weight:800"  class="rdbname"></h3>
+            </div>
+        </div>
+
+        <div class="col-md-12" align="center">
+            <div>
+                <button id="run" type="button" class="btn  green">
+                    启动切换流程
+                </button>
+            </div>
+        </div>
+{#        <div class="col-md-12">#}
+{#            <textarea name="" id="test" cols="10" rows="5" style="margin: 0px; width: 672px; height: 162px;"></textarea>#}
+{#        </div>#}
     </div>
 
 
@@ -20,16 +44,6 @@
                     <span> {% endfor %}</span>
 
             {% endif %}
-        </div>
-        <div class="row">
-            <div class="col-md-6">
-                <div>
-                    <button id="run" type="button" class="btn  green">
-                        启动
-                        <i class="fa fa-plus"></i>
-                    </button>
-                </div>
-            </div>
         </div>
 
     </div>
