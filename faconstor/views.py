@@ -18,7 +18,7 @@ import requests
 from operator import itemgetter
 import logging
 from collections import OrderedDict
-import cx_Oracle
+# import cx_Oracle
 
 from django.contrib.auth.decorators import login_required
 from django.utils.timezone import utc
@@ -6741,67 +6741,54 @@ def host_save(request):
                                     except ValueError as e:
                                         ret = 0
                                         info = "主机类型未选择"
-                                    else:
-                                        if oracle_name.strip():
-                                            if oracle_password.strip():
-                                                if oracle_instance.strip():
-                                                    # 新增
-                                                    if host_id == 0:
-                                                        # 判断主机是否已经存在
-                                                        check_host_manage = HostsManage.objects.filter(host_ip=host_ip)
-                                                        if check_host_manage.exists():
-                                                            ret = 0
-                                                            info = "主机已经存在，请勿重复添加。"
-                                                        else:
-                                                            try:
-                                                                cur_host_manage = HostsManage()
-                                                                cur_host_manage.host_ip = host_ip
-                                                                cur_host_manage.host_name = host_name
-                                                                cur_host_manage.os = host_os
-                                                                cur_host_manage.type = connect_type
-                                                                cur_host_manage.username = username
-                                                                cur_host_manage.password = password
-                                                                cur_host_manage.host_type = host_type
-                                                                cur_host_manage.oracle_name = oracle_name
-                                                                cur_host_manage.oracle_password = oracle_password
-                                                                cur_host_manage.oracle_instance = oracle_instance
-                                                                cur_host_manage.save()
-                                                            except:
-                                                                ret = 0
-                                                                info = "服务器异常。"
-                                                            else:
-                                                                ret = 1
-                                                                info = "新增主机成功。"
-                                                    else:
-                                                        # 修改
-                                                        try:
-                                                            cur_host_manage = HostsManage.objects.get(id=host_id)
-                                                            cur_host_manage.host_ip = host_ip
-                                                            cur_host_manage.host_name = host_name
-                                                            cur_host_manage.os = host_os
-                                                            cur_host_manage.type = connect_type
-                                                            cur_host_manage.username = username
-                                                            cur_host_manage.password = password
-                                                            cur_host_manage.host_type = host_type
-                                                            cur_host_manage.oracle_name = oracle_name
-                                                            cur_host_manage.oracle_password = oracle_password
-                                                            cur_host_manage.oracle_instance = oracle_instance
-                                                            cur_host_manage.save()
-
-                                                            ret = 1
-                                                            info = "主机信息修改成功。"
-                                                        except:
-                                                            ret = 0
-                                                            info = "服务器异常。"
-                                                else:
-                                                    ret = 0
-                                                    info = "oracle实例未填写"
-                                            else:
-                                                ret = 0
-                                                info = "oracle密码未填写"
-                                        else:
+                                    # 新增
+                                    if host_id == 0:
+                                        # 判断主机是否已经存在
+                                        check_host_manage = HostsManage.objects.filter(host_ip=host_ip)
+                                        if check_host_manage.exists():
                                             ret = 0
-                                            info = "oracle用户名未填写"
+                                            info = "主机已经存在，请勿重复添加。"
+                                        else:
+                                            try:
+                                                cur_host_manage = HostsManage()
+                                                cur_host_manage.host_ip = host_ip
+                                                cur_host_manage.host_name = host_name
+                                                cur_host_manage.os = host_os
+                                                cur_host_manage.type = connect_type
+                                                cur_host_manage.username = username
+                                                cur_host_manage.password = password
+                                                cur_host_manage.host_type = host_type
+                                                cur_host_manage.oracle_name = oracle_name
+                                                cur_host_manage.oracle_password = oracle_password
+                                                cur_host_manage.oracle_instance = oracle_instance
+                                                cur_host_manage.save()
+                                            except:
+                                                ret = 0
+                                                info = "服务器异常。"
+                                            else:
+                                                ret = 1
+                                                info = "新增主机成功。"
+                                    else:
+                                        # 修改
+                                        try:
+                                            cur_host_manage = HostsManage.objects.get(id=host_id)
+                                            cur_host_manage.host_ip = host_ip
+                                            cur_host_manage.host_name = host_name
+                                            cur_host_manage.os = host_os
+                                            cur_host_manage.type = connect_type
+                                            cur_host_manage.username = username
+                                            cur_host_manage.password = password
+                                            cur_host_manage.host_type = host_type
+                                            cur_host_manage.oracle_name = oracle_name
+                                            cur_host_manage.oracle_password = oracle_password
+                                            cur_host_manage.oracle_instance = oracle_instance
+                                            cur_host_manage.save()
+
+                                            ret = 1
+                                            info = "主机信息修改成功。"
+                                        except:
+                                            ret = 0
+                                            info = "服务器异常。"
                                 else:
                                     ret = 0
                                     info = "密码未填写。"
