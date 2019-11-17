@@ -154,11 +154,17 @@ $(document).ready(function () {
         $("#oraclename").addClass("hidden");
         $("#oraclepassword").addClass("hidden");
         $("#oracleinstance").addClass("hidden");
+        $("#oracle_name").addClass("hidden");
+        $("#oracle_password").addClass("hidden");
+        $("#oracle_instance").addClass("hidden");
     }
     else if ($(this).val() == '2' || $(this).val() == '1') {
         $("#oraclename").removeClass("hidden");
         $("#oraclepassword").removeClass("hidden");
         $("#oracleinstance").removeClass("hidden");
+        $("#oracle_name").removeClass("hidden");
+        $("#oracle_password").removeClass("hidden");
+        $("#oracle_instance").removeClass("hidden");
     }
 });
 
