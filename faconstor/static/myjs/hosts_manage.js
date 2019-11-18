@@ -147,4 +147,25 @@ $(document).ready(function () {
             $("#type").val("");
         }
     });
+
+
+    $("#host_type").change(function () {
+    if ($(this).val() == '3') {
+        $("#oraclename").addClass("hidden");
+        $("#oraclepassword").addClass("hidden");
+        $("#oracleinstance").addClass("hidden");
+        $("#oracle_name").addClass("hidden");
+        $("#oracle_password").addClass("hidden");
+        $("#oracle_instance").addClass("hidden");
+    }
+    else if ($(this).val() == '2' || $(this).val() == '1') {
+        $("#oraclename").removeClass("hidden");
+        $("#oraclepassword").removeClass("hidden");
+        $("#oracleinstance").removeClass("hidden");
+        $("#oracle_name").removeClass("hidden");
+        $("#oracle_password").removeClass("hidden");
+        $("#oracle_instance").removeClass("hidden");
+    }
+});
+
 });
