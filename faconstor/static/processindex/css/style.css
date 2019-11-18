@@ -220,12 +220,12 @@ input {
     width: 304px;
     height: 70px;
     margin: 20px 0 0 37px;
-    padding-top: 31px;
+    padding-top: 15px;
     padding-left: 90px;
     background: url(../images/circular.png) no-repeat;
 }
 .processname1 h3 {
-
+    padding-top: 17px;
     font-size: 25px;
     letter-spacing:4px;
     color: #e8e8e8 !important;
@@ -234,12 +234,12 @@ input {
     width: 304px;
     height: 70px;
     margin: 20px 0 0 37px;
-    padding-top: 31px;
+    padding-top: 15px;
     padding-left: 90px;
     background: url(../images/circular2.gif) no-repeat;
 }
 .processname h3 {
-
+    padding-top: 17px;
     font-size: 25px;
     letter-spacing:4px;
     color: #e8e8e8 !important;
@@ -248,12 +248,12 @@ input {
     width: 304px;
     height: 70px;
     margin: 20px 0 0 37px;
-    padding-top: 31px;
+    padding-top: 15px;
     padding-left: 90px;
     background: url(../images/circular3.png) no-repeat;
 }
 .processname2 h3 {
-
+    padding-top: 17px;
     font-size: 25px;
     letter-spacing:4px;
     color: #e8e8e8 !important;

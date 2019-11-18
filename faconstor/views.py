@@ -3235,7 +3235,7 @@ def custom_step_tree(request):
                 root["text"] = rootnode.name
                 root["id"] = rootnode.id
                 group_name = ""
-                if rootnode.group:
+                if rootnode.group.strip():
                     group_id = rootnode.group
                     group_name = Group.objects.filter(id=group_id)[0].name
                 root["data"] = {"time": rootnode.time, "approval": rootnode.approval, "skip": rootnode.skip,
@@ -3851,13 +3851,6 @@ def cv_oracle_run(request):
         except:
             return JsonResponse({"res": "当前流程不存在。"})
 
-        if not origin.strip():
-            return JsonResponse({"res": "流程步骤中未添加Commvault接口，导致源客户端未空。"})
-
-        try:
-            target = int(target)
-        except:
-            return JsonResponse({"res": "目标客户端未选择。"})
 
         process = Process.objects.filter(id=processid).exclude(state="9").filter(type="cv_oracle")
         if (len(process) <= 0):
@@ -3877,9 +3870,6 @@ def cv_oracle_run(request):
                     myprocessrun.creatuser = request.user.username
                     myprocessrun.run_reason = run_reason
                     myprocessrun.state = "RUN"
-
-                    myprocessrun.recover_time = datetime.datetime.strptime(recovery_time,
-                                                                           "%Y-%m-%d %H:%M:%S") if recovery_time else None
 
                     myprocessrun.save()
                     mystep = process[0].step_set.exclude(state="9").order_by("sort")
