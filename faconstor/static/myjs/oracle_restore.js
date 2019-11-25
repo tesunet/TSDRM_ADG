@@ -110,7 +110,8 @@ $(document).ready(function () {
                     processid: process_id,
                     run_person: $("#run_person").val(),
                     run_time: $("#run_time").val(),
-                    run_reason: $("#run_reason").val()
+                    run_reason: $("#run_reason").val(),
+                    process_type:$("#process_type").val()
                 },
             success: function (data) {
                 if (data["res"] == "新增成功。") {
@@ -133,7 +134,19 @@ $(document).ready(function () {
         // 写入当前时间
         var myDate = new Date();
         $("#run_time").val(myDate.toLocaleString());
-
+        $("#process_type").val('1');
+        $("#target").val("")
+    });
+    $("#back").click(function () {
+        $("#static").modal({backdrop: "static"});
+        $('#recovery_time').datetimepicker({
+            format: 'yyyy-mm-dd hh:ii:ss',
+            pickerPosition: 'top-right'
+        });
+        // 写入当前时间
+        var myDate = new Date();
+        $("#run_time").val(myDate.toLocaleString());
+        $("#process_type").val('2');
         $("#target").val("")
     });
 
