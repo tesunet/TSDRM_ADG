@@ -98,6 +98,7 @@ $(document).ready(function () {
         $("#process_color").val(data.process_color);
         $("#process_main_database").val(data.main_database_id);
         $("#process_prepare_database").val(data.prepare_database_id);
+        $("#process_back").val(data.process_back_id);
         console.log(data)
     });
 
@@ -113,6 +114,7 @@ $(document).ready(function () {
         $("#process_color").val("");
         $("#process_main_database").val("");
         $("#process_prepare_database").val("");
+        $("#process_back").val("");
 
 
     });
@@ -136,7 +138,8 @@ $(document).ready(function () {
                     sort: $("#sort").val(),
                     color: $("#process_color").val(),
                     main_database: $("#process_main_database").val(),
-                    prepare_database: $("#process_prepare_database").val()
+                    prepare_database: $("#process_prepare_database").val(),
+                    process_back: $("#process_back").val()
 
                 },
             success: function (data) {

@@ -3471,6 +3471,8 @@ def process_design(request, funid):
         # all_prepare_database = HostsManage.objects.exclude(state="9").filter(host_type='备数据库')
         all_main_database = []
         all_prepare_database = []
+        all_processes_back = []
+        all_processes = Process.objects.exclude(state="9").filter(type='cv_oracle')
         all_hosts = HostsManage.objects.exclude(state="9")
         for host in all_hosts:
             if host.host_type == 1:
@@ -3483,9 +3485,14 @@ def process_design(request, funid):
                     "prepare_database_id": host.id,
                     "prepare_database_name": host.host_name
                 })
+        for process in all_processes:
+            all_processes_back.append({
+                "process_id": process.id,
+                "process_name": process.name
+            })
         return render(request, "processdesign.html",
                       {'username': request.user.userinfo.fullname, "pagefuns": getpagefuns(funid, request=request),
-                       'all_main_database': all_main_database, 'all_prepare_database': all_prepare_database
+                       'all_main_database': all_main_database, 'all_prepare_database': all_prepare_database,'all_processes_back':all_processes_back
                        })
 
 
@@ -3510,7 +3517,9 @@ def process_data(request):
                     "main_database_id": process.primary.id if process.primary else "",
                     "main_database_name": process.primary.host_name if process.primary else "",
                     "prepare_database_id": process.standby.id if process.standby else "",
-                    "prepare_database_name": process.standby.host_name if process.standby else ""
+                    "prepare_database_name": process.standby.host_name if process.standby else "",
+                    "process_back_id": process.backprocess.id if process.backprocess else "",
+                    "process_back_name": process.backprocess.name if process.backprocess else ""
                 })
         print(result)
 
@@ -3565,6 +3574,7 @@ def process_save(request):
         color = request.POST.get('color', '')
         main_database = request.POST.get('main_database', '')
         prepare_database = request.POST.get('prepare_database', '')
+        process_back = request.POST.get('process_back', '')
 
         try:
             id = int(id)
@@ -3589,6 +3599,10 @@ def process_save(request):
                         except ValueError as e:
                             result["res"] = '备数据库不能为空。'
                         else:
+                            try:
+                                process_back = int(process_back)
+                            except ValueError as e:
+                                process_back = None
                             if id == 0:
                                 all_process = Process.objects.filter(code=code).exclude(
                                     state="9").filter(type="cv_oracle")
@@ -3608,6 +3622,7 @@ def process_save(request):
                                     processsave.color = color
                                     processsave.primary_id = main_database
                                     processsave.standby_id = prepare_database
+                                    processsave.backprocess_id=process_back
                                     processsave.save()
                                     result["res"] = "保存成功。"
                                     result["data"] = processsave.id
@@ -3629,6 +3644,7 @@ def process_save(request):
                                         processsave.color = color
                                         processsave.primary_id = main_database
                                         processsave.standby_id = prepare_database
+                                        processsave.backprocess_id = process_back
                                         processsave.save()
                                         result["res"] = "保存成功。"
                                         result["data"] = processsave.id

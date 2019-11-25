@@ -105,6 +105,7 @@ class Process(models.Model):
     color = models.CharField("颜色", blank=True, max_length=50)
     primary = models.ForeignKey(HostsManage, blank=True, null=True, verbose_name='主数据库', related_name="process_primary_set")
     standby = models.ForeignKey(HostsManage, blank=True, null=True, verbose_name='备数据库', related_name="process_standby_set")
+    backprocess = models.ForeignKey('self', blank=True, null=True, verbose_name='回切流程', related_name="process_backprocess_set")
 
 
 class Step(models.Model):
