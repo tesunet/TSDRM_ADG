@@ -215,12 +215,20 @@ $(document).ready(function () {
             l_switchover_status = data["data"][0].switchover_status;
 
             r_host_name=data["data"][1].host_name;
-            r_db_status = data["data"][0].db_status;
+            r_db_status = data["data"][1].db_status;
             r_switchover_status = data["data"][1].switchover_status;
-            $(".ldbname").text(l_host_name+"(" + l_db_status + ")");
-            $(".rdbname").text(r_host_name+"(" + r_db_status + ")");
+            $(".ldbname").text(l_host_name);
+            $(".ldbsta").text(l_db_status );
+            $(".rdbname").text(r_host_name);
+            $(".rdbsta").text(r_db_status);
 
             if(l_db_status=="OPEN"){
+                $(".ldbimg").attr("src","/static/new/images/db1.png");
+            }
+            if(l_db_status=="READ ONLY WITH APPLY"){
+                $(".ldbimg").attr("src","/static/new/images/db1.png");
+            }
+            if(l_db_status=="READ WRITE"){
                 $(".ldbimg").attr("src","/static/new/images/db1.png");
             }
             if(l_db_status=="READ ONLY"){
@@ -230,6 +238,12 @@ $(document).ready(function () {
                 $(".ldbimg").attr("src","/static/new/images/db2.png");
             }
             if(r_db_status=="OPEN"){
+                $(".rdbimg").attr("src","/static/new/images/db1.png");
+            }
+            if(r_db_status=="READ ONLY WITH APPLY"){
+                $(".rdbimg").attr("src","/static/new/images/db1.png");
+            }
+            if(r_db_status=="READ WRITE"){
                 $(".rdbimg").attr("src","/static/new/images/db1.png");
             }
             if(r_db_status=="MOUNT"){

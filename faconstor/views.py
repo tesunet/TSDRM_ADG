@@ -7583,7 +7583,7 @@ def get_oracle_status(request):
                     conn = cx_Oracle.connect('{oracle_name}/{oracle_password}@{host_ip}/{oracle_instance}'.format(
                         oracle_name=oracle_name, oracle_password=oracle_password, host_ip=host_ip, oracle_instance=oracle_instance))
                     curs = conn.cursor()
-                    a_db_status_sql = 'SELECT status FROM v$instance'
+                    a_db_status_sql = 'select open_mode from v$database'
                     curs.execute(a_db_status_sql)
                     db_status_row = curs.fetchone()
                     db_status = db_status_row[0] if db_status_row else ""
