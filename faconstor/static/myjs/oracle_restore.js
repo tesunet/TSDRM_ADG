@@ -216,17 +216,33 @@ $(document).ready(function () {
 
             r_host_name=data["data"][1].host_name;
             r_db_status = data["data"][0].db_status;
-            $(".ldbname").text(l_host_name);
-            $(".rdbname").text(r_host_name);
+            r_switchover_status = data["data"][1].switchover_status;
+            $(".ldbname").text(l_host_name+"(" + l_db_status + ")");
+            $(".rdbname").text(r_host_name+"(" + r_db_status + ")");
 
             if(l_db_status=="OPEN"){
                 $(".ldbimg").attr("src","/static/new/images/db1.png");
             }
+            if(l_db_status=="READ ONLY"){
+                $(".ldbimg").attr("src","/static/new/images/db1.png");
+            }
+            if(l_db_status=="MOUNT"){
+                $(".ldbimg").attr("src","/static/new/images/db2.png");
+            }
             if(r_db_status=="OPEN"){
                 $(".rdbimg").attr("src","/static/new/images/db1.png");
             }
+            if(r_db_status=="MOUNT"){
+                $(".rdbimg").attr("src","/static/new/images/db2.png");
+            }
+            if(r_db_status=="READ ONLY"){
+                $(".ldbimg").attr("src","/static/new/images/db1.png");
+            }
             if(l_switchover_status=="PRIMARY"){
                 $(".sync").attr("src","/static/new/images/sync_r.gif");
+            }
+            if(r_switchover_status=="PRIMARY"){
+                $(".sync").attr("src","/static/new/images/sync_l.gif");
             }
 
             //$("#test").val(JSON.stringify(data["data"]) + "\n" + "host_status:主机状态,host_ip:主机IP，switchover_status:切换状态,database_role:切换角色,host_name:主机名称,db_status:数据库状态");
