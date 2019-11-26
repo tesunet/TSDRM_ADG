@@ -7583,16 +7583,12 @@ def get_oracle_status(request):
                     conn = cx_Oracle.connect('{oracle_name}/{oracle_password}@{host_ip}/{oracle_instance}'.format(
                         oracle_name=oracle_name, oracle_password=oracle_password, host_ip=host_ip, oracle_instance=oracle_instance))
                     curs = conn.cursor()
-                    a_db_status_sql = 'select open_mode from v$database'
+                    a_db_status_sql = 'select open_mode,switchover_status,database_role from v$database'
                     curs.execute(a_db_status_sql)
                     db_status_row = curs.fetchone()
                     db_status = db_status_row[0] if db_status_row else ""
-
-                    adg_info_sql = 'SELECT switchover_status,database_role FROM v$database'
-                    curs.execute(adg_info_sql)
-                    adg_info_row = curs.fetchone()
-                    database_role = adg_info_row[0] if adg_info_row else ""
-                    switchover_status = adg_info_row[1] if adg_info_row else ""
+                    database_role = db_status_row[1] if db_status_row else ""
+                    switchover_status = db_status_row[2] if db_status_row else ""
                 except Exception as e:
                     check_host = ServerByPara('cd ..', host_ip, host_username, host_password, host_os)
                     result = check_host.run("")
