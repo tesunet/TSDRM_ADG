@@ -250,7 +250,7 @@ $(document).ready(function () {
                 $(".rdbimg").attr("src","/static/new/images/db2.png");
             }
             if(r_db_status=="READ ONLY"){
-                $(".ldbimg").attr("src","/static/new/images/db1.png");
+                $(".rdbimg").attr("src","/static/new/images/db1.png");
             }
             if(l_switchover_status=="PRIMARY"){
                 $(".sync").attr("src","/static/new/images/sync_r.gif");
