@@ -4519,7 +4519,7 @@ def revoke_current_task(request):
             except:
                 task_process_id = ""
             # 终止指定流程的异步任务
-            if value["state"] == "STARTED" and task_process_id == process_run_id:
+            if value["state"] in ["STARTED", "SUCCESS"] and task_process_id == process_run_id:
                 task_id = key
 
         if abnormal in ["1", "2"]:
