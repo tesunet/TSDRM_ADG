@@ -53,6 +53,10 @@ class DataMonitor(object):
                 cursor.execute(temp_sql)
                 self._conn.commit()
 
+    def close(self):
+        if self._conn:
+            self._conn.close()
+            
 
 class CVApi(DataMonitor):
     def get_all_install_clients(self):

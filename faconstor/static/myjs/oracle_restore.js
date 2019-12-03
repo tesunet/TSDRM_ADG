@@ -262,7 +262,7 @@ $(document).ready(function () {
             //$("#test").val(JSON.stringify(data["data"]) + "\n" + "host_status:主机状态,host_ip:主机IP，switchover_status:切换状态,database_role:切换角色,host_name:主机名称,db_status:数据库状态");
         },
         error: function (e) {
-            ;
+            // ..
         }
     });
 });

@@ -204,8 +204,12 @@ class ServerByPara(object):
     def run(self, succeedtext):
         if self.system_choice == "Linux":
             result = self.exec_linux_cmd(succeedtext)
+            if self.client:
+                self.client.close()
         elif self.system_choice == "AIX":
             result = self.exec_linux_cmd(succeedtext, port=22)
+            if self.client:
+                self.client.close()
         else:
             result = self.exec_win_cmd(succeedtext)
         print(result)
@@ -214,7 +218,8 @@ class ServerByPara(object):
 if __name__ == '__main__':
     # server_obj = ServerByPara(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
     # server_obj = ServerByPara(r"C:\Users\Administrator\Desktop\test_python.bat", "192.168.100.151", "administrator","tesunet@2017", "Windows")
-    server_obj = ServerByPara('cd ..', "192.168.1.56 ", "root", "tesunet", "Linux")
+    server_obj = ServerByPara(
+        r'/tmp/drm/971/tmp_script_6553.sh', "10.18.13.95", "root", "root1234", "Linux")
     # print(cmd)  # sed -i 's/\r$//' /tmp/drm/954/tmp_script_6486.sh&&/tmp/drm/954/tmp_script_6486.sh
     # server_obj = ServerByPara("mkdir -p /tmp/drm/957",
     #                           "10.64.7.43", "root", "qtdl2003", "Linux")
